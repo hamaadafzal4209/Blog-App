@@ -59,7 +59,7 @@ app.post("/login", async (req, res) => {
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (isPasswordValid) {
-            jwt.sign({ email, id: user._id }, secret, {}, (err, token) => {
+            jwt.sign({ email, id: user._id, username: user.username }, secret, {}, (err, token) => {
                 if (err) throw err;
                 res.cookie("token", token, {
                     httpOnly: true,
@@ -78,12 +78,22 @@ app.post("/login", async (req, res) => {
 
 app.get("/profile", (req, res) => {
     const { token } = req.cookies;
-    res.json(req.cookies);
+    if (!token) {
+        return res.status(401).json({ error: "Unauthorized" });
+    }
     jwt.verify(token, secret, {}, (err, info) => {
-        if (err) throw err;
+        if (err) {
+            console.error("Error verifying token:", err);
+            return res.status(401).json({ error: "Unauthorized" });
+        }
+        if (!info || !info.username) {
+            console.error("Invalid token or missing username:", info);
+            return res.status(400).json({ error: "Invalid token" });
+        }
+        console.log("Decoded token:", info);
         res.json(info);
-    })
-})
+    });
+});
 
 app.listen(4000, () => {
     console.log("Server is running on port: 4000");

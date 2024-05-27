@@ -20,7 +20,7 @@ function Register() {
       
       if (response.status === 201) {
         console.log('Register successful');
-        navigate('/');
+        navigate('/login');
       } else {
         alert(data.error || 'Failed to register');
       }

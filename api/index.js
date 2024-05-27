@@ -3,6 +3,8 @@ const app = express();
 
 const cors = require("cors");
 const mongoose = require("mongoose");
+const userModel = require('./models/User.js')
+const bcrypt = require('bcrypt');
 
 app.use(cors());
 app.use(express.json());
@@ -17,7 +19,18 @@ mongoose
     });
 
 app.post("/register", (req, res) => {
-    res.status(201).json("OK!");
+    const { username, email, password } = req.body;
+    bcrypt.genSalt(10, function (err, salt) {
+        bcrypt.hash(password, salt, async function (err, hash) {
+            const user = await userModel.create({
+                username,
+                email,
+                password: hash
+            })
+            res.json(user);
+        });
+    });
+
 });
 
 app.listen(4000, () => {

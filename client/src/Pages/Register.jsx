@@ -18,7 +18,7 @@ function Register() {
       console.log(response);
       console.log('Register succesful');
     } catch (error) {
-      console.log("Failed to register");
+      alert("Failed to register");
     }
   }
 

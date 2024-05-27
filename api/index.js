@@ -9,10 +9,12 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const secret = "jkjkdjklsjdksjdklsjkdjs";
 
-app.use(cors({
-    origin: "http://localhost:5174",
-    credentials: true
-}));
+app.use(
+    cors({
+        origin: "http://localhost:5174",
+        credentials: true,
+    })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -74,6 +76,14 @@ app.post("/login", async (req, res) => {
     }
 });
 
+app.get("/profile", (req, res) => {
+    const { token } = req.cookies;
+    res.json(req.cookies);
+    jwt.verify(token, secret, {}, (err, info) => {
+        if (err) throw err;
+        res.json(info);
+    })
+})
 
 app.listen(4000, () => {
     console.log("Server is running on port: 4000");

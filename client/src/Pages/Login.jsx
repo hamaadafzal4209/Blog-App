@@ -13,7 +13,7 @@ function Login() {
         method: "POST",
         body: JSON.stringify({ email, password }),
         headers: { "Content-Type": "application/json" },
-        credentials: 'include',
+        credentials: "include",
       });
       if (response.status === 200) {
         console.log("Login successful");

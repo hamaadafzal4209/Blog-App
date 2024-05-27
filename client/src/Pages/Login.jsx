@@ -1,12 +1,33 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch('http://localhost:4000/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (response.status === 200) {
+        navigate('/')
+      }
+    } catch (error) {
+      alert('Something went wrong!');
+    }
+  }
+
   return (
     <div className="p-4">
       <h2 className="text-center text-2xl sm:text-3xl font-bold pt-4 pb-8">
         Login Your Account
       </h2>
-      <form className="max-w-sm mx-auto">
+      <form onSubmit={handleSubmit} className="max-w-sm mx-auto">
         <div className="mb-5">
           <label
             htmlFor="email"
@@ -18,6 +39,8 @@ function Login() {
             type="email"
             id="email"
             name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             placeholder="name@flowbite.com"
             required
@@ -34,6 +57,8 @@ function Login() {
             type="password"
             id="password"
             name="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             required
           />

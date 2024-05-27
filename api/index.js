@@ -9,7 +9,10 @@ const jwt = require("jsonwebtoken");
 const app = express();
 const secret = "jkjkdjklsjdksjdklsjkdjs";
 
-app.use(cors({ credentials: true, origin: 'http://localhost:5174/' }));
+app.use(cors({
+    origin: "http://localhost:5174",
+    credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 

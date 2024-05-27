@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function Navbar() {
     return (
-        <nav className="flex items-center justify-between py-6 px-4 sm:px-10 md:px-16 lg:px-20">
+        <nav className="shadow flex items-center justify-between py-4 px-4 sm:px-10 md:px-16 lg:px-20">
             <h2 className="text-lg sm:text-2xl font-semibold">
                 <Link to='/'>MyBlog</Link>
             </h2>

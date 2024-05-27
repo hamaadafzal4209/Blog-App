@@ -6,7 +6,7 @@ import Register from "./Pages/Register";
 
 function App() {
   return (
-    <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-6">
+    <div className="">
       <BrowserRouter>
         <Navbar />
         <Routes>

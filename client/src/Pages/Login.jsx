@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function Login() {
   return (
-    <div>
+    <div className="p-4">
       <h2 className="text-center text-2xl sm:text-3xl font-bold pt-4 pb-8">
         Login Your Account
       </h2>

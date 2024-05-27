@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function Register() {
   return (
-    <div>
+    <div className="p-4">
       <h2 className="text-center text-2xl sm:text-3xl font-bold pt-4 pb-8">
         Register Your Account
       </h2>

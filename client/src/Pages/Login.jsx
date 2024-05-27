@@ -15,6 +15,7 @@ function Login() {
         headers: { 'Content-Type': 'application/json' }
       })
       if (response.status === 200) {
+        console.log(response);
         navigate('/')
       }
     } catch (error) {

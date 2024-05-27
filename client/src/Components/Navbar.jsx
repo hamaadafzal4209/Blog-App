@@ -1,6 +1,16 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 function Navbar() {
+    
+    useEffect(() => {
+        fetch('http://localhost:4000/profile', {
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error fetching profile:', error));
+    }, []);
     
     return (
         <nav className="shadow flex items-center justify-between py-4 px-4 sm:px-10 md:px-16 lg:px-20">

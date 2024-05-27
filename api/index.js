@@ -95,6 +95,13 @@ app.get("/profile", (req, res) => {
     });
 });
 
+app.post("/logout", (req, res) => {
+    res.cookie('token', '', {
+        httpOnly: true,
+        sameSite: "strict",
+    }).json({ message: 'Logout successful' });
+});
+
 app.listen(4000, () => {
     console.log("Server is running on port: 4000");
 });

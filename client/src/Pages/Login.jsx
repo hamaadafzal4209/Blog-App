@@ -2,26 +2,30 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-      const response = await fetch('http://localhost:4000/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:4000/login", {
+        method: "POST",
         body: JSON.stringify({ email, password }),
-        headers: { 'Content-Type': 'application/json' }
-      })
+        headers: { "Content-Type": "application/json" },
+      });
       if (response.status === 200) {
-        console.log(response);
-        navigate('/')
+        console.log("Login successful");
+        navigate("/");
+      } else {
+        const errorMessage = await response.text();
+        alert(errorMessage);
       }
     } catch (error) {
-      alert('Something went wrong!');
+      alert("Something went wrong!");
+      console.log(error);
     }
-  }
+  };
 
   return (
     <div className="p-4">

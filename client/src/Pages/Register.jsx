@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 function Register() {
-
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,14 +14,19 @@ function Register() {
         method: 'POST',
         body: JSON.stringify({ username, email, password }),
         headers: { 'Content-Type': 'application/json' }
-      })
-      console.log(response);
-      console.log('Register succesful');
-      if (response.status === 200) {
+      });
+      
+      const data = await response.json();
+      
+      if (response.status === 201) {
+        console.log('Register successful');
         navigate('/');
+      } else {
+        alert(data.error || 'Failed to register');
       }
     } catch (error) {
       alert("Failed to register");
+      console.log(error);
     }
   }
 

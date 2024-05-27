@@ -6,9 +6,9 @@ import Register from "./Pages/Register";
 
 function App() {
   return (
-    <div>
-      <Navbar />
+    <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-6">
       <BrowserRouter>
+        <Navbar />
         <Routes>
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />

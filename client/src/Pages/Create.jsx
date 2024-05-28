@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useNavigate } from "react-router-dom";
 
 const modules = {
     toolbar: [
@@ -36,6 +37,7 @@ function Create() {
     const [summary, setSummary] = useState("");
     const [files, setFiles] = useState(null);
     const [content, setContent] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -45,12 +47,22 @@ function Create() {
         data.set("content", content);
         data.set("file", files[0]);
 
-        console.log(files);
-        const response = await fetch("http://localhost:4000/post", {
-            method: "POST",
-            body: data,
-        });
-        console.log(await response.json())
+        try {
+            const response = await fetch("http://localhost:4000/post", {
+                method: "POST",
+                body: data,
+            });
+
+            if (response.ok) {
+                navigate("/");
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.error}`);
+            }
+        } catch (error) {
+            console.error("Error creating post:", error);
+            alert("Failed to create post");
+        }
     };
 
     return (

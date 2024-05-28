@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const userModel = require("./models/User.js");
+const postModel = require("./models/Post.js");
 const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -115,22 +116,40 @@ app.post("/logout", (req, res) => {
     .json({ message: "Logout successful" });
 });
 
-app.post("/post", uploadMiddleware.single("file"), (req, res) => {
+app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
   const { originalname, path: tempPath } = req.file;
   const parts = originalname.split(".");
   const ext = parts[parts.length - 1];
   const newPath = tempPath + "." + ext;
-
-  fs.rename(tempPath, newPath, (err) => {
+  fs.rename(tempPath, newPath, async (err) => {
     if (err) {
       console.error("Error renaming file:", err);
       return res.status(500).json({ error: "Failed to save file" });
     }
-    res.json({ files: { ...req.file, path: newPath, url: `http://localhost:4000/${newPath}` } });
+
+    const { title, summary, content } = req.body;
+
+    try {
+      const post = await postModel.create({
+        title,
+        summary,
+        content,
+        cover: newPath,
+      });
+      res.json(post);
+    } catch (error) {
+      console.error("Error creating post:", error);
+      res.status(500).json({ error: "Failed to create post" });
+    }
   });
 });
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.get("/post", async (req,res) => {
+    const allPosts = await postModel.find()
+    res.json(allPosts);
+})
 
 app.listen(4000, () => {
   console.log("Server is running on port: 4000");

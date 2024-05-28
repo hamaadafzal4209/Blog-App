@@ -18,7 +18,7 @@ const uploadMiddleware = multer({ dest: "uploads/" });
 
 app.use(
   cors({
-    origin: "http://localhost:5174",
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
@@ -33,6 +33,22 @@ mongoose
   .catch((error) => {
     console.error("Database connection error:", error);
   });
+
+// Authorization Middleware
+const authorize = (req, res, next) => {
+  const { token } = req.cookies;
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  jwt.verify(token, secret, {}, (err, info) => {
+    if (err || !info || !info.username) {
+      console.error("Invalid token or missing username:", info);
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    req.user = info;
+    next();
+  });
+};
 
 app.post("/register", async (req, res) => {
   const { username, email, password } = req.body;
@@ -88,23 +104,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", (req, res) => {
-  const { token } = req.cookies;
-  if (!token) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-  jwt.verify(token, secret, {}, (err, info) => {
-    if (err) {
-      console.error("Error verifying token:", err);
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    if (!info || !info.username) {
-      console.error("Invalid token or missing username:", info);
-      return res.status(400).json({ error: "Invalid token" });
-    }
-    console.log("Decoded token:", info);
-    res.json(info);
-  });
+app.get("/profile", authorize, (req, res) => {
+  res.json(req.user);
 });
 
 app.post("/logout", (req, res) => {
@@ -116,40 +117,35 @@ app.post("/logout", (req, res) => {
     .json({ message: "Logout successful" });
 });
 
-app.post("/post", uploadMiddleware.single("file"), async (req, res) => {
+app.post("/post", authorize, uploadMiddleware.single("file"), async (req, res) => {
   const { originalname, path: tempPath } = req.file;
   const parts = originalname.split(".");
   const ext = parts[parts.length - 1];
   const newPath = tempPath + "." + ext;
-  fs.rename(tempPath, newPath, async (err) => {
-    if (err) {
-      console.error("Error renaming file:", err);
-      return res.status(500).json({ error: "Failed to save file" });
-    }
 
+  try {
+    fs.renameSync(tempPath, newPath);
     const { title, summary, content } = req.body;
-
-    try {
-      const post = await postModel.create({
-        title,
-        summary,
-        content,
-        cover: newPath,
-      });
-      res.json(post);
-    } catch (error) {
-      console.error("Error creating post:", error);
-      res.status(500).json({ error: "Failed to create post" });
-    }
-  });
+    const post = await postModel.create({
+      title,
+      summary,
+      content,
+      cover: newPath,
+      author: req.user.id,
+    });
+    res.json(post);
+  } catch (error) {
+    console.error("Error renaming file:", error);
+    res.status(500).json({ error: "Failed to save file" });
+  }
 });
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.get("/post", async (req,res) => {
-    const allPosts = await postModel.find()
-    res.json(allPosts);
-})
+app.get("/post", async (req, res) => {
+  const allPosts = await postModel.find().populate("author", ["username"]);
+  res.json(allPosts);
+});
 
 app.listen(4000, () => {
   console.log("Server is running on port: 4000");

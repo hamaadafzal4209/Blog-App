@@ -18,6 +18,7 @@ function Login() {
       if (response.status === 200) {
         console.log("Login successful");
         navigate("/");
+        location.reload();
       } else {
         const errorMessage = await response.text();
         alert(errorMessage);

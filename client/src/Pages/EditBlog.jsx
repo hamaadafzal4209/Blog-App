@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
@@ -34,11 +34,11 @@ const formats = [
 
 function EditBlog() {
     const { id } = useParams();
-    const history = useHistory();
     const [title, setTitle] = useState("");
     const [summary, setSummary] = useState("");
     const [files, setFiles] = useState(null);
     const [content, setContent] = useState("");
+    const navigate = useNavigate(); // Initialize the navigate function
 
     useEffect(() => {
         // Fetch blog details based on id
@@ -70,7 +70,7 @@ function EditBlog() {
             });
 
             if (response.ok) {
-                history.push(`/post/${id}`);
+                navigate(`/post/${id}`); // Use navigate to redirect the user
             } else {
                 const errorData = await response.json();
                 alert(`Error: ${errorData.error}`);

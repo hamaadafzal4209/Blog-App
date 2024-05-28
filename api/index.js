@@ -130,18 +130,69 @@ app.post(
     try {
       fs.renameSync(tempPath, newPath);
       const { title, summary, content } = req.body;
-      const coverPath = newPath.replace(/\\/g, "/");
+      const coverPath = newPath.replace(/\\/g, "/"); // Convert backslashes to forward slashes
       const post = await postModel.create({
         title,
         summary,
         content,
-        cover: coverPath,
+        cover: coverPath, // Store the relative path with forward slashes
         author: req.user.id,
       });
       res.json(post);
     } catch (error) {
       console.error("Error renaming file:", error);
       res.status(500).json({ error: "Failed to save file" });
+    }
+  }
+);
+
+app.put(
+  "/post/:id",
+  authorize,
+  uploadMiddleware.single("file"),
+  async (req, res) => {
+    const { id } = req.params;
+    try {
+      let post = await postModel.findById(id);
+      if (!post) {
+        return res.status(404).json({ error: "Post not found" });
+      }
+
+      // Check if the user is authorized to edit the post
+      if (post.author.toString() !== req.user.id) {
+        return res.status(403).json({ error: "Unauthorized to edit this post" });
+      }
+
+      // Update title and summary if provided
+      if (req.body.title) {
+        post.title = req.body.title;
+      }
+      if (req.body.summary) {
+        post.summary = req.body.summary;
+      }
+
+      // Update content if provided
+      if (req.body.content) {
+        post.content = req.body.content;
+      }
+
+      // Update cover image if provided
+      if (req.file) {
+        const { originalname, path: tempPath } = req.file;
+        const parts = originalname.split(".");
+        const ext = parts[parts.length - 1];
+        const newPath = tempPath + "." + ext;
+        fs.renameSync(tempPath, newPath);
+        const coverPath = newPath.replace(/\\/g, "/");
+        post.cover = coverPath;
+      }
+
+      // Save updated post
+      post = await post.save();
+      res.json(post);
+    } catch (error) {
+      console.error("Error updating post:", error);
+      res.status(500).json({ error: "Failed to update post" });
     }
   }
 );
@@ -161,10 +212,10 @@ app.get("/post", async (req, res) => {
   }
 });
 
-app.get('/post/:id', async (req, res) => {
+app.get("/post/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const post = await postModel.findById(id).populate('author', ['username']);
+    const post = await postModel.findById(id).populate("author", ["username"]);
     if (!post) {
       return res.status(404).json({ error: "Post not found" });
     }
@@ -178,3 +229,4 @@ app.get('/post/:id', async (req, res) => {
 app.listen(4000, () => {
   console.log("Server is running on port: 4000");
 });
+

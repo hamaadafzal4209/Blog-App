@@ -35,8 +35,8 @@ function BlogDetails() {
                     </Link>
                 </div>
             )}
-            <div className="max-h-72 overflow-hidden rounded-lg mb-4">
-                <img src={`http://localhost:4000/${blogDetail.cover}`} alt={blogDetail.title} className=" mb-4 object-cover" />
+            <div className="max-h-72 overflow-hidden rounded-lg mb-4 w-full">
+                <img src={`http://localhost:4000/${blogDetail.cover}`} alt={blogDetail.title} className=" mb-4 h-full w-full object-cover" />
             </div>
             <p className="text-gray-700 mb-4">{blogDetail.summary}</p>
             <div dangerouslySetInnerHTML={{ __html: blogDetail.content }} className="text-gray-800" />

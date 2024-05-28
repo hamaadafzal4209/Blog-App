@@ -130,12 +130,12 @@ app.post(
     try {
       fs.renameSync(tempPath, newPath);
       const { title, summary, content } = req.body;
-      const coverPath = newPath.replace(/\\/g, "/"); // Convert backslashes to forward slashes
+      const coverPath = newPath.replace(/\\/g, "/");
       const post = await postModel.create({
         title,
         summary,
         content,
-        cover: coverPath, // Store the relative path with forward slashes
+        cover: coverPath,
         author: req.user.id,
       });
       res.json(post);
@@ -158,6 +158,20 @@ app.get("/post", async (req, res) => {
   } catch (error) {
     console.error("Error fetching posts:", error);
     res.status(500).json({ error: "Failed to fetch posts" });
+  }
+});
+
+app.get('/post/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const post = await postModel.findById(id).populate('author', ['username']);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    res.json(post);
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    res.status(500).json({ error: "Failed to fetch post" });
   }
 });
 

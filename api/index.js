@@ -117,34 +117,48 @@ app.post("/logout", (req, res) => {
     .json({ message: "Logout successful" });
 });
 
-app.post("/post", authorize, uploadMiddleware.single("file"), async (req, res) => {
-  const { originalname, path: tempPath } = req.file;
-  const parts = originalname.split(".");
-  const ext = parts[parts.length - 1];
-  const newPath = tempPath + "." + ext;
+app.post(
+  "/post",
+  authorize,
+  uploadMiddleware.single("file"),
+  async (req, res) => {
+    const { originalname, path: tempPath } = req.file;
+    const parts = originalname.split(".");
+    const ext = parts[parts.length - 1];
+    const newPath = tempPath + "." + ext;
 
-  try {
-    fs.renameSync(tempPath, newPath);
-    const { title, summary, content } = req.body;
-    const post = await postModel.create({
-      title,
-      summary,
-      content,
-      cover: newPath,
-      author: req.user.id,
-    });
-    res.json(post);
-  } catch (error) {
-    console.error("Error renaming file:", error);
-    res.status(500).json({ error: "Failed to save file" });
+    try {
+      fs.renameSync(tempPath, newPath);
+      const { title, summary, content } = req.body;
+      const coverPath = newPath.replace(/\\/g, "/"); // Convert backslashes to forward slashes
+      const post = await postModel.create({
+        title,
+        summary,
+        content,
+        cover: coverPath, // Store the relative path with forward slashes
+        author: req.user.id,
+      });
+      res.json(post);
+    } catch (error) {
+      console.error("Error renaming file:", error);
+      res.status(500).json({ error: "Failed to save file" });
+    }
   }
-});
+);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.get("/post", async (req, res) => {
-  const allPosts = await postModel.find().populate("author", ["username"]);
-  res.json(allPosts);
+  try {
+    const allPosts = await postModel
+      .find()
+      .populate("author", ["username"])
+      .sort({ createdAt: -1 });
+    res.json(allPosts);
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
 });
 
 app.listen(4000, () => {
